@@ -1,4 +1,4 @@
-name: [Dotnet] SonarCloud Analysis
+name: SonarCloud Analysis Template
 on:
   workflow_call:
     inputs:
