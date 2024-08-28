@@ -1,4 +1,4 @@
-name: SonarCloud Analysis Template
+name: SonarCloud Analysis for Dotnet
 on:
   workflow_call:
     inputs:
@@ -29,6 +29,10 @@ on:
         required: false
         type: string
         default: ''
+      projectOrSolution:
+        description: 'Path to the project or solution to build and analyze. (Optional)'
+        required: false
+        type: string
     secrets:
       githubToken:
         description: '[Required] GitHub token for PR information and checkouts.'
@@ -92,6 +96,7 @@ jobs:
           $verboseFlag = if (${{ inputs.verbose }}) {"true"} else {"false"}
           $sonarExclusions = "${{ inputs.sonarExclusions }}"
           $coverageExclusions = "${{ inputs.coverageExclusions }}"
+          $projectOrSolution = if (${{ inputs.projectOrSolution }}) { ${{ inputs.projectOrSolution }} } else { "" }
           
           $sonarBeginCmd = ".\.sonar\scanner\dotnet-sonarscanner begin /k:`"${{ inputs.projectKey }}`" /o:`"${{ inputs.organization }}`" /d:sonar.token=`"${{ secrets.sonarToken }}`" /d:sonar.host.url=`"https://sonarcloud.io`" /d:`"sonar.verbose=$verboseFlag`" /d:sonar.cs.vscoveragexml.reportsPaths=`"coverage.xml`""
           if (-not [string]::IsNullOrWhiteSpace($sonarExclusions)) {
@@ -102,6 +107,13 @@ jobs:
           }
           
           Invoke-Expression $sonarBeginCmd
-          dotnet build --configuration Release
-          dotnet-coverage collect 'dotnet test' -f xml -o 'coverage.xml'
+          
+          if (-not [string]::IsNullOrWhiteSpace($projectOrSolution)) {
+            dotnet build --configuration Release $projectOrSolution
+            dotnet-coverage collect "dotnet test $projectOrSolution" -f xml -o 'coverage.xml'
+          } else {
+            dotnet build --configuration Release
+            dotnet-coverage collect 'dotnet test' -f xml -o 'coverage.xml'
+          }
+          
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.sonarToken }}"
