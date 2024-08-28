@@ -33,6 +33,11 @@ on:
         description: 'Path to the project or solution to build and analyze. (Optional)'
         required: false
         type: string
+      scanAll:
+        description: 'Enable full scan with SonarCloud scanner. (Default: false)'
+        required: false
+        type: boolean
+        default: false
     secrets:
       githubToken:
         description: '[Required] GitHub token for PR information and checkouts.'
@@ -97,8 +102,9 @@ jobs:
           $sonarExclusions = "${{ inputs.sonarExclusions }}"
           $coverageExclusions = "${{ inputs.coverageExclusions }}"
           $projectOrSolution = "${{ inputs.projectOrSolution }}"
+          $scanAllFlag = if (${{ inputs.scanAll }}) {"true"} else {"false"}
           
-          $sonarBeginCmd = ".\.sonar\scanner\dotnet-sonarscanner begin /k:`"${{ inputs.projectKey }}`" /o:`"${{ inputs.organization }}`" /d:sonar.token=`"${{ secrets.sonarToken }}`" /d:sonar.host.url=`"https://sonarcloud.io`" /d:`"sonar.verbose=$verboseFlag`" /d:sonar.cs.vscoveragexml.reportsPaths=`"coverage.xml`""
+          $sonarBeginCmd = ".\.sonar\scanner\dotnet-sonarscanner begin /k:`"${{ inputs.projectKey }}`" /o:`"${{ inputs.organization }}`" /d:sonar.token=`"${{ secrets.sonarToken }}`" /d:sonar.host.url=`"https://sonarcloud.io`" /d:`"sonar.verbose=$verboseFlag`" /d:sonar.cs.vscoveragexml.reportsPaths=`"coverage.xml`" /d:`"sonar.scanner.scanAll=$scanAllFlag`""
           if (-not [string]::IsNullOrWhiteSpace($sonarExclusions)) {
             $sonarBeginCmd += " /d:`"sonar.exclusions=$sonarExclusions`""
           }
