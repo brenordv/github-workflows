@@ -96,7 +96,7 @@ jobs:
           $verboseFlag = if (${{ inputs.verbose }}) {"true"} else {"false"}
           $sonarExclusions = "${{ inputs.sonarExclusions }}"
           $coverageExclusions = "${{ inputs.coverageExclusions }}"
-          $projectOrSolution = if (${{ inputs.projectOrSolution }}) { ${{ inputs.projectOrSolution }} } else { "" }
+          $projectOrSolution = "${{ inputs.projectOrSolution }}"
           
           $sonarBeginCmd = ".\.sonar\scanner\dotnet-sonarscanner begin /k:`"${{ inputs.projectKey }}`" /o:`"${{ inputs.organization }}`" /d:sonar.token=`"${{ secrets.sonarToken }}`" /d:sonar.host.url=`"https://sonarcloud.io`" /d:`"sonar.verbose=$verboseFlag`" /d:sonar.cs.vscoveragexml.reportsPaths=`"coverage.xml`""
           if (-not [string]::IsNullOrWhiteSpace($sonarExclusions)) {
@@ -109,7 +109,7 @@ jobs:
           Invoke-Expression $sonarBeginCmd
           
           if (-not [string]::IsNullOrWhiteSpace($projectOrSolution)) {
-            dotnet build --configuration Release $projectOrSolution
+            dotnet build --configuration Release "$projectOrSolution"
             dotnet-coverage collect "dotnet test $projectOrSolution" -f xml -o 'coverage.xml'
           } else {
             dotnet build --configuration Release
