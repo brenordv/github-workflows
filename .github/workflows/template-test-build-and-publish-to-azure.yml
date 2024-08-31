@@ -1,10 +1,13 @@
-name: [Dotnet] Full Publish Pipeline Workflow
+name: Full Publish Pipeline Workflow for Dotnet
 # This template will test, build, create a new release with the .zip artifacts, and deploy to Azure Functions.
 #
 # To create a new release, the <AssemblyVersion> of the csproj must be updated. If it's the same, no new release 
 # will be created.
 #
 # If publishToAzure input is set to true, the workflow will also deploy the new release to the Azure Functions App.
+# 
+# Note: This workflow needs to be refactored, since it is doing way too much. For a workflow  that creates the release
+# and uploads the artifacts (including nuget packages), check: template-create-release-and-artifacts.yml
 
 on:
   workflow_call:
